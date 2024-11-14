@@ -8,7 +8,7 @@ from io import BytesIO
 CLIENT_ID = 'buzzqnu77m'
 CLIENT_SECRET = 'QkOrNDd4v57qIR2WKrE1gNO7WKKYeiXUMtjjfTAN'
 
-# Geocoding API 호출 함수
+# Geocoding API 호출 함수ff
 def get_coordinates(address):
     url = f"https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode"
     headers = {
