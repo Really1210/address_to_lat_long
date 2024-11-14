@@ -5,8 +5,8 @@ import pydeck as pdk
 from io import BytesIO
 
 # 네이버 API 정보
-CLIENT_ID = 'YOUR_CLIENT_ID'
-CLIENT_SECRET = 'YOUR_CLIENT_SECRET'
+CLIENT_ID = 'buzzqnu77m'
+CLIENT_SECRET = 'QkOrNDd4v57qIR2WKrE1gNO7WKKYeiXUMtjjfTAN'
 
 # Geocoding API 호출 함수
 def get_coordinates(address):
