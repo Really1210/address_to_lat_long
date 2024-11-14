@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 import pydeck as pdk
+from io import BytesIO
 
 # 네이버 API 정보
 CLIENT_ID = 'YOUR_CLIENT_ID'
@@ -16,13 +17,16 @@ def get_coordinates(address):
     }
     params = {"query": address}
     response = requests.get(url, headers=headers, params=params)
-    data = response.json()
-    
-    if data.get('meta', {}).get('totalCount', 0) > 0:
-        lat = data['addresses'][0]['y']
-        lon = data['addresses'][0]['x']
-        return float(lat), float(lon)
-    else:
+    try:
+        data = response.json()
+        if data.get('meta', {}).get('totalCount', 0) > 0:
+            lat = data['addresses'][0]['y']
+            lon = data['addresses'][0]['x']
+            return float(lat), float(lon)
+        else:
+            return None, None
+    except Exception as e:
+        st.error(f"API 호출 오류: {e}")
         return None, None
 
 # 스트림릿 UI
@@ -37,11 +41,14 @@ addresses = []
 if input_mode == "CSV 파일 업로드":
     uploaded_file = st.file_uploader("CSV 파일 업로드", type=["csv"])
     if uploaded_file:
-        df = pd.read_csv(uploaded_file)
-        if 'address' in df.columns:
-            addresses = df['address'].tolist()
-        else:
-            st.error("CSV 파일에 'address' 열이 없습니다.")
+        try:
+            df = pd.read_csv(uploaded_file)
+            if 'address' in df.columns:
+                addresses = df['address'].tolist()
+            else:
+                st.error("CSV 파일에 'address' 열이 없습니다.")
+        except Exception as e:
+            st.error(f"파일 읽기 오류: {e}")
 else:
     address_input = st.text_area("주소를 한 줄에 하나씩 입력하세요")
     if address_input:
@@ -62,9 +69,13 @@ if st.button("위경도 변환"):
         st.dataframe(result_df)
         
         # 엑셀 파일 다운로드 링크 생성
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            result_df.to_excel(writer, index=False)
+        output.seek(0)  # BytesIO 객체의 시작 부분으로 이동
         st.download_button(
             label="엑셀 파일로 다운로드",
-            data=result_df.to_excel(index=False, engine='openpyxl'),
+            data=output,
             file_name="coordinates.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
@@ -94,5 +105,7 @@ if st.button("위경도 변환"):
                     ],
                 )
             )
+        else:
+            st.warning("유효한 위경도 데이터가 없습니다.")
     else:
         st.error("주소를 입력하세요.")
