@@ -90,7 +90,7 @@ if st.button("위경도 변환"):
                     initial_view_state=pdk.ViewState(
                         latitude=map_data["위도"].mean(),
                         longitude=map_data["경도"].mean(),
-                        zoom=20,
+                        zoom=10,
                         pitch=0,
                     ),
                     layers=[
